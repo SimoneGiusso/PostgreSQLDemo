@@ -1,0 +1,40 @@
+networks:
+  default:
+    name: internal-network
+
+services:
+  masterdb:
+    image: postgres:15.6-alpine
+    container_name: primary-server
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: psw
+    volumes:
+      - ./primary_config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./primary_config/pg_hba.conf:/etc/pg_hba.conf
+      - ./primary_config/postgresql.conf:/etc/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql.conf
+
+  readonlydb:
+    image: postgres:15.6-alpine
+    container_name: hot-standby
+    ports:
+      - 5430:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: psw
+      PGUSER: replica_role
+      PGPASSWORD: replica_password
+    user: postgres
+    command: |
+      bash -c "
+      echo 'Waiting for primary...'
+      sleep 3s
+      pg_basebackup --pgdata=/var/lib/postgresql/data --write-recovery-conf --host=masterdb --port=5432
+      chmod 0700 /var/lib/postgresql/data
+      postgres
+      "
+    depends_on:
+      - masterdb
