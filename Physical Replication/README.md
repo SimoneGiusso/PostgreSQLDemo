@@ -8,5 +8,5 @@ Run
 
 `docker compose up --build -d --renew-anon-volumes --force-recreate`
 
-You can now follow the instruction in [demo.sql](./demo.sql)
+This will start two databases locally. You can now connect to them at http://localhost:5432 (primary) and http://localhost:5430 (replica) and follow the instructions in [demo.sql](./demo.sql).
 
