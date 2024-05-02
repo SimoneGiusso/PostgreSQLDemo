@@ -1,6 +1,6 @@
 networks:
   default:
-    name: internal-network
+    name: internal-network # Rename the default network name which otherwise depends on the directory of the docker compose file (this is used in pg_hba.conf file)
 
 services:
   masterdb:
@@ -28,9 +28,9 @@ services:
       PGUSER: replica_role
       PGPASSWORD: replica_password
     user: postgres
-    command: |
+    command: | # Wait few seconds, give the correct permission to the data folder and start the postgres server
       bash -c "
-      echo 'Waiting for primary...'
+      echo 'Waiting for primary when ready to accept connections...'
       sleep 3s
       pg_basebackup --pgdata=/var/lib/postgresql/data --write-recovery-conf --host=masterdb --port=5432
       chmod 0700 /var/lib/postgresql/data
